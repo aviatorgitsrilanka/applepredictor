@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apple of Fortune — Signal Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Tajawal',sans-serif;background:#071a07;min-height:100vh;overflow-x:hidden}
+
+.bg{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 50% 110%,#1e6e1e 0%,#0c360c 40%,#071a07 100%)}
+.bg::before{content:'';position:absolute;bottom:0;left:-10%;width:120%;height:38%;
+  background:
+    radial-gradient(ellipse 80px 160px at 8% 100%,#1a7a1a 0%,transparent 70%),
+    radial-gradient(ellipse 100px 200px at 30% 100%,#0d5c0d 0%,transparent 70%),
+    radial-gradient(ellipse 70px 140px at 55% 100%,#2a8a2a 0%,transparent 70%),
+    radial-gradient(ellipse 100px 200px at 80% 100%,#0a4a0a 0%,transparent 70%);
+  filter:blur(3px)}
+
+/* LOGO */
+.logo-top{background:#000;text-align:center;position:relative;z-index:50;line-height:0}
+.logo-top img{width:88%;max-width:420px;display:inline-block}
+
+/* LANG */
+.lang-bar{display:flex;justify-content:center;gap:8px;padding:8px 16px;
+  background:rgba(0,0,0,0.55);border-bottom:1px solid rgba(255,255,255,0.08);
+  position:relative;z-index:50}
+.lb{padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.3);
+  background:transparent;color:rgba(255,255,255,0.55);font-size:12px;cursor:pointer;
+  font-family:'Tajawal',sans-serif}
+.lb.on{background:#2ecc40;border-color:#2ecc40;color:#000;font-weight:700}
+
+/* SCREENS */
+.screen{display:none;position:relative;z-index:10}
+.screen.on{display:block}
+
+/* INTRO */
+.card{margin:12px 14px 24px;background:rgba(0,0,0,0.68);
+  border:1px solid rgba(57,255,20,0.18);border-radius:16px;
+  padding:18px 16px;backdrop-filter:blur(10px)}
+.card-title{font-size:17px;font-weight:900;color:#fff;text-align:center;
+  margin-bottom:16px;line-height:1.4}
+.steps{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.step{display:flex;align-items:flex-start;gap:10px;
+  background:rgba(255,255,255,0.04);border-radius:10px;padding:11px;
+  border-right:3px solid #2ecc40}
+[dir=ltr] .step{border-right:none;border-left:3px solid #2ecc40}
+.snum{width:26px;height:26px;border-radius:50%;background:#2ecc40;color:#000;
+  font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stxt{font-size:13px;color:rgba(255,255,255,0.85);line-height:1.5}
+.stxt b{color:#FFD700}
+
+.alert{background:rgba(232,25,44,0.1);border:1px solid rgba(232,25,44,0.35);
+  border-radius:12px;padding:14px;margin-bottom:18px;text-align:center}
+.alert-ico{font-size:20px;margin-bottom:5px}
+.alert-txt{font-size:13px;color:rgba(255,255,255,0.88);line-height:1.5}
+.promo{display:inline-block;background:#e8192c;color:#fff;font-weight:900;
+  font-size:18px;padding:6px 16px;border-radius:8px;margin:7px 0 4px;letter-spacing:2px}
+
+.tiers-title{font-size:13px;font-weight:700;color:rgba(255,255,255,0.55);
+  text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.tiers{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.tier{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
+  position:relative;overflow:hidden}
+.tier.rec{border-color:rgba(255,140,0,0.5);background:rgba(255,140,0,0.07)}
+.tier.vip{border-color:rgba(138,43,226,0.5);background:rgba(138,43,226,0.07)}
+.tier.min{border-color:rgba(57,255,20,0.35);background:rgba(57,255,20,0.05)}
+.tbadge{position:absolute;top:5px;right:8px;font-size:10px;padding:2px 7px;
+  border-radius:10px;font-weight:700}
+[dir=ltr] .tbadge{right:auto;left:8px}
+.bmin{background:#2ecc40;color:#000}
+.brec{background:#FF8C00;color:#fff}
+.bvip{background:#7B2FBE;color:#fff}
+.tleft{display:flex;flex-direction:column;padding-top:14px}
+.tamt{font-size:20px;font-weight:900;color:#fff}
+.tsub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px}
+.tright{padding-top:14px;text-align:left}
+[dir=rtl] .tright{text-align:right}
+.ttot{font-size:13px;color:#FFD700;font-weight:700}
+.tpct{font-size:11px;color:rgba(255,255,255,0.45)}
+
+.btn-reg{width:100%;padding:15px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#e8192c,#c0001f);color:#fff;
+  font-family:'Tajawal',sans-serif;font-size:16px;font-weight:900;cursor:pointer;
+  box-shadow:0 4px 20px rgba(232,25,44,0.35);display:block;
+  text-align:center;margin-bottom:12px;text-decoration:none}
+.btn-start{width:100%;padding:14px;border-radius:12px;
+  border:2px solid #39ff14;background:transparent;color:#39ff14;
+  font-family:'Tajawal',sans-serif;font-size:15px;font-weight:900;cursor:pointer;
+  text-shadow:0 0 10px rgba(57,255,20,0.5)}
+
+/* GAME */
+.ghdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+  background:rgba(0,0,0,0.6);border-bottom:1px solid rgba(255,255,255,0.07)}
+.gtitle{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;
+  color:#fff;letter-spacing:2px;text-transform:uppercase;flex:1;text-align:center}
+.backbtn{background:none;border:none;color:rgba(255,255,255,0.5);
+  font-size:22px;cursor:pointer;padding:4px 10px;line-height:1}
+.hspace{width:44px}
+
+.gwrap{padding:8px 6px 6px}
+.pbar-wrap{margin-bottom:5px}
+.pbar{height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:#39ff14;border-radius:2px;
+  transition:width 0.4s ease;box-shadow:0 0 6px rgba(57,255,20,0.6)}
+
+.gviewport{overflow:hidden;position:relative}
+.ginner{transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)}
+.grow{display:flex;gap:3px;margin-bottom:3px;position:relative}
+
+/* CELL */
+.cell{flex:none;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#c8823a,#8c5218 55%,#5e3008);
+  border:2px solid rgba(210,160,70,0.3);
+  box-shadow:inset 0 -5px 10px rgba(0,0,0,0.5),inset 0 3px 6px rgba(255,200,90,0.15),0 3px 6px rgba(0,0,0,0.4);
+  position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cell::before{content:'';position:absolute;top:10%;left:20%;
+  width:28%;height:20%;background:rgba(255,255,255,0.18);
+  border-radius:50%;transform:rotate(-35deg);pointer-events:none}
+.cimg{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;border-radius:50%;opacity:0;pointer-events:none}
+.cell.ok{border-color:rgba(100,220,100,0.6);animation:burst 0.5s cubic-bezier(0.36,0.07,0.19,0.97) forwards}
+.cell.ok .itrue{opacity:1}
+.cell.ok::before{display:none}
+.cell.bad{opacity:0.65}
+.cell.bad .ifall{opacity:1}
+.cell.bad::before{opacity:0.4}
+@keyframes burst{
+  0%{transform:scale(1)}
+  20%{transform:scale(1.2);box-shadow:0 0 22px rgba(57,255,20,0.9),0 0 44px rgba(57,255,20,0.4)}
+  40%{transform:scale(0.9)}
+  65%{transform:scale(1.08)}
+  100%{transform:scale(1);box-shadow:0 0 8px rgba(57,255,20,0.3)}}
+.cell.glow{border:2.5px solid #39ff14 !important;
+  box-shadow:0 0 16px rgba(57,255,20,0.9),0 0 32px rgba(57,255,20,0.4),inset 0 0 10px rgba(57,255,20,0.1) !important;
+  animation:pg 0.85s ease-in-out infinite !important}
+@keyframes pg{
+  0%,100%{box-shadow:0 0 16px rgba(57,255,20,0.9),0 0 32px rgba(57,255,20,0.4)}
+  50%{box-shadow:0 0 28px rgba(57,255,20,1),0 0 55px rgba(57,255,20,0.6)}}
+.sdot{position:absolute;top:1px;right:1px;width:14px;height:14px;
+  border-radius:50%;background:#39ff14;display:none;
+  align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#000;z-index:5;
+  animation:bd 0.7s ease-in-out infinite}
+[dir=rtl] .sdot{right:auto;left:1px}
+.cell.glow .sdot{display:flex}
+@keyframes bd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.75)}}
+
+/* BOTTOM BTNS */
+.gbtm{padding:6px 10px 0}
+.brow{display:flex;gap:5px;margin-bottom:8px}
+.gbtn{flex:1;padding:13px 5px;border-radius:10px;border:none;
+  font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:0.8px;cursor:pointer;text-transform:uppercase}
+.gbtn:active{transform:scale(0.95);opacity:0.85}
+.gnew{background:#e6a817;color:#000}
+.gsig{background:linear-gradient(135deg,#1a9c1a,#0d6b0d);color:#fff;
+  font-size:14px;flex:1.6;box-shadow:0 3px 14px rgba(46,204,64,0.45);
+  border:1px solid rgba(57,255,20,0.4)}
+.gsig.spin{animation:sp 0.55s ease-in-out infinite}
+.gsig:disabled{opacity:0.5}
+@keyframes sp{0%,100%{box-shadow:0 3px 14px rgba(46,204,64,0.45)}50%{box-shadow:0 3px 28px rgba(57,255,20,0.9)}}
+.gmenu{background:#4a90d9;color:#fff}
+
+/* MODALS */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:300;
+  display:none;align-items:center;justify-content:center}
+.mover.on{display:flex;animation:fi 0.25s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.mbox{background:rgba(6,24,6,0.98);border:1.5px solid rgba(57,255,20,0.3);
+  border-radius:18px;padding:24px 20px;margin:20px;
+  box-shadow:0 0 30px rgba(57,255,20,0.15);text-align:center;width:100%;max-width:360px}
+.mbox.err{border-color:rgba(232,25,44,0.4)}
+.mtitle{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px}
+.mtxt{font-size:14px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:18px}
+.minput{width:100%;padding:12px 14px;border-radius:10px;
+  border:1.5px solid rgba(57,255,20,0.4);background:rgba(255,255,255,0.06);
+  color:#fff;font-size:18px;font-family:'Tajawal',sans-serif;
+  text-align:center;letter-spacing:4px;margin-bottom:6px;outline:none;
+  -webkit-appearance:none}
+.minput:focus{border-color:#39ff14;box-shadow:0 0 10px rgba(57,255,20,0.3)}
+.merr{font-size:12px;color:#ff6060;min-height:18px;margin-bottom:12px;text-align:center}
+.mrow{display:flex;gap:8px}
+.mbtn{flex:1;padding:13px;border-radius:10px;border:none;
+  font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;text-transform:uppercase;letter-spacing:0.5px}
+.mok{background:linear-gradient(135deg,#1a9c1a,#0d6b0d);color:#fff;
+  box-shadow:0 3px 12px rgba(46,204,64,0.35)}
+.mcancel{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65)}
+.mdanger{background:linear-gradient(135deg,#e8192c,#b80018);color:#fff}
+.mereg{display:block;width:100%;padding:14px;border-radius:12px;
+  background:linear-gradient(135deg,#e8192c,#c0001f);color:#fff;
+  font-size:15px;font-weight:900;text-decoration:none;margin-bottom:10px;
+  font-family:'Tajawal',sans-serif;box-shadow:0 4px 18px rgba(232,25,44,0.4)}
+.meclose{background:transparent;border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.55);padding:10px;border-radius:10px;
+  width:100%;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer}
+
+/* WIN */
+.wover{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;
+  display:none;align-items:center;justify-content:center}
+.wover.on{display:flex;animation:fi 0.3s ease}
+.wbox{background:rgba(6,30,6,0.98);border:2px solid #39ff14;
+  border-radius:20px;padding:28px 22px;margin:18px;
+  box-shadow:0 0 40px rgba(57,255,20,0.28);text-align:center}
+.wtitle{font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;color:#fff;
+  margin-bottom:10px;text-shadow:0 0 18px rgba(57,255,20,0.5)}
+.wtxt{font-size:14px;color:rgba(255,255,255,0.7);margin-bottom:20px;line-height:1.6}
+.wreg{display:block;width:100%;padding:15px;border-radius:12px;
+  background:linear-gradient(135deg,#e8192c,#c0001f);color:#fff;
+  font-size:15px;font-weight:900;text-decoration:none;margin-bottom:10px;
+  font-family:'Tajawal',sans-serif;box-shadow:0 4px 18px rgba(232,25,44,0.4)}
+.wnew{background:transparent;border:1px solid rgba(255,255,255,0.25);
+  color:rgba(255,255,255,0.6);padding:11px;border-radius:10px;
+  width:100%;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer}
+
+.scanline{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(57,255,20,0.4),transparent);
+  animation:sc 0.65s ease-in-out;border-radius:10px;z-index:10}
+@keyframes sc{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.pt{position:fixed;pointer-events:none;z-index:50;animation:pf 0.9s ease-out forwards}
+@keyframes pf{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-75px) scale(0.3)}}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- LOGO — always visible on top -->
+<div class="logo-top">
+  <img src="logo.PNG" alt="Apple of Fortune">
+</div>
+
+<!-- LANG — only in intro -->
+<div class="lang-bar" id="langBar">
+  <button class="lb" onclick="setLang('fr')">FR</button>
+  <button class="lb" onclick="setLang('tr')">TR</button>
+  <button class="lb" onclick="setLang('en')">EN</button>
+  <button class="lb on" onclick="setLang('ar')">عربي</button>
+</div>
+
+<!-- INTRO -->
+<div id="sIntro" class="screen on">
+<div class="card">
+  <div class="card-title" id="t_title"></div>
+  <div class="steps" id="t_steps"></div>
+  <div class="alert">
+    <div class="alert-ico">⚠️</div>
+    <div class="alert-txt" id="t_alert"></div>
+    <div class="promo">RABAH26</div>
+    <div class="alert-txt" id="t_alert2" style="font-size:12px;margin-top:5px"></div>
+  </div>
+  <div class="tiers-title" id="t_tiertitle"></div>
+  <div class="tiers">
+    <div class="tier min">
+      <span class="tbadge bmin" id="t_bmin"></span>
+      <div class="tleft"><div class="tamt">$5</div><div class="tsub" id="t_min_sub"></div></div>
+      <div class="tright"><div class="ttot" id="t_min_tot"></div></div>
+    </div>
+    <div class="tier rec">
+      <span class="tbadge brec" id="t_brec"></span>
+      <div class="tleft"><div class="tamt">$10</div><div class="tsub" id="t_rec_sub"></div></div>
+      <div class="tright"><div class="ttot">= $25</div><div class="tpct">$10 + $15</div></div>
+    </div>
+    <div class="tier vip">
+      <span class="tbadge bvip" id="t_bvip"></span>
+      <div class="tleft"><div class="tamt">$20</div><div class="tsub" id="t_vip_sub"></div></div>
+      <div class="tright"><div class="ttot">= $40</div><div class="tpct">$20 + $20</div></div>
+    </div>
+  </div>
+  <a id="btnReg" href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="btn-reg"></a>
+  <button class="btn-start" id="btnStart"></button>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="sGame" class="screen">
+  <div class="ghdr">
+    <button class="backbtn" id="btnBack">←</button>
+    <div class="gtitle">APPLE OF FORTUNE</div>
+    <div class="hspace"></div>
+  </div>
+  <div class="gwrap">
+    <div class="pbar-wrap"><div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div></div>
+    <div class="gviewport" id="gvp"><div class="ginner" id="gin"></div></div>
+  </div>
+  <div class="gbtm">
+    <div class="brow">
+      <button class="gbtn gnew" id="btnNew"></button>
+      <button class="gbtn gsig" id="btnSig"></button>
+      <button class="gbtn gmenu" id="btnMenu"></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ID -->
+<div class="mover" id="mId">
+  <div class="mbox">
+    <div class="mtitle" id="m_id_title"></div>
+    <div class="mtxt" id="m_id_txt"></div>
+    <input class="minput" id="idInp" type="tel" inputmode="numeric" maxlength="10">
+    <div class="merr" id="idErr"></div>
+    <div class="mrow">
+      <button class="mbtn mcancel" id="btnIdCancel"></button>
+      <button class="mbtn mok" id="btnIdOk"></button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Old account -->
+<div class="mover" id="mErr">
+  <div class="mbox err">
+    <div class="mtitle" style="color:#ff6060" id="m_err_title"></div>
+    <div class="mtxt" id="m_err_txt"></div>
+    <a id="btnErrReg" href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="mereg"></a>
+    <button class="meclose" id="btnErrClose"></button>
+  </div>
+</div>
+
+<!-- MODAL: Confirm end -->
+<div class="mover" id="mConf">
+  <div class="mbox">
+    <div class="mtitle" id="m_conf_title"></div>
+    <div class="mtxt" id="m_conf_txt"></div>
+    <div class="mrow">
+      <button class="mbtn mcancel" id="btnConfNo"></button>
+      <button class="mbtn mdanger" id="btnConfYes"></button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="wover" id="wOver">
+  <div class="wbox">
+    <div class="wtitle" id="w_title"></div>
+    <div class="wtxt" id="w_txt"></div>
+    <a id="btnWinReg" href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="wreg"></a>
+    <button class="wnew" id="btnWinNew"></button>
+  </div>
+</div>
+
+<script>
+// ===== TRANSLATIONS =====
+const TX = {
+  ar:{
+    title:'كيف تستخدم النظام؟ 🎯',
+    steps:[
+      'سجّل <b>حساب جديد</b> على 1xBet باستخدام الكود أدناه',
+      'اشحن حسابك بمبلغ <b>$5 أو أكثر</b> لتفعيل نظام الإشارات',
+      'افتح لعبة <b>"Apple of Fortune"</b> على 1xBet',
+      'أدخل <b>ID حسابك</b> على 1xBet واضغط SIGNAL',
+      'انقر على <b>نفس الخانة</b> المضيئة في اللعبة 💰'
+    ],
+    alert:'النظام يعمل فقط مع حسابات مسجّلة بالكود:',
+    alert2:'حساب بدون الكود = الإشارات لا تعمل',
+    tiertitle:'خطط الإيداع والمكافآت',
+    bmin:'الحد الأدنى',brec:'⚡ موصى به',bvip:'👑 VIP',
+    min_sub:'تفعيل الإشارات',min_tot:'✅ الإشارات',
+    rec_sub:'بونوس +150%',vip_sub:'بونوس +100%',
+    reg:'💰 سجّل الآن وابدأ تكسب',
+    start:'🎯 ابدأ التنبؤ',
+    id_title:'🔐 أدخل ID حسابك',
+    id_txt:'أدخل رقم حسابك في 1xBet المكون من 10 أرقام',
+    id_cancel:'إلغاء',id_ok:'تحقق',
+    id_err:'يجب أن يكون الرقم 10 أرقام',
+    err_title:'❌ الحساب غير مرتبط',
+    err_txt:'حسابك قديم أو غير مسجّل بكود البرنامج.\nأنشئ حساباً جديداً بكود RABAH26 واشحن $5 على الأقل.',
+    err_reg:'💰 إنشاء حساب جديد',err_close:'إغلاق',
+    conf_title:'⚠️ إنهاء الجولة؟',
+    conf_txt:'هل تريد إنهاء الجولة الحالية؟ ستُفقد جميع الإشارات.',
+    conf_no:'لا',conf_yes:'نعم، إنهاء',
+    w_title:'🎉 فزت!',
+    w_txt:'النظام حدّد كل الخانات بنجاح!\nسجّل على 1xBet لسحب أرباحك الحقيقية 💰',
+    w_reg:'💰 سجّل واشحن الآن',w_new:'العب مرة أخرى',
+    btn_new:'لعبة جديدة',btn_sig:'📡 SIGNAL',btn_menu:'القائمة',
+  },
+  en:{
+    title:'How to use the system? 🎯',
+    steps:[
+      'Register a <b>new account</b> on 1xBet using the code below',
+      'Deposit <b>$5 or more</b> to activate the signal system',
+      'Open <b>"Apple of Fortune"</b> on 1xBet',
+      'Enter your <b>1xBet account ID</b> and press SIGNAL',
+      'Click the <b>same highlighted cell</b> in the game 💰'
+    ],
+    alert:'System works ONLY with accounts registered with code:',
+    alert2:'Account without code = signals won\'t work',
+    tiertitle:'Deposit Plans & Bonuses',
+    bmin:'Minimum',brec:'⚡ Recommended',bvip:'👑 VIP',
+    min_sub:'Signals activated',min_tot:'✅ Signals',
+    rec_sub:'Bonus +150%',vip_sub:'Bonus +100%',
+    reg:'💰 Register Now & Start Winning',
+    start:'🎯 Start Predicting',
+    id_title:'🔐 Enter Account ID',
+    id_txt:'Enter your 10-digit 1xBet account ID to get the signal',
+    id_cancel:'Cancel',id_ok:'Verify',
+    id_err:'ID must be exactly 10 digits',
+    err_title:'❌ Account Not Found',
+    err_txt:'Your account is too old or not registered with the promo code.\nCreate a new account with code RABAH26 and deposit at least $5.',
+    err_reg:'💰 Register New Account',err_close:'Close',
+    conf_title:'⚠️ End Round?',
+    conf_txt:'End the current round? All progress will be lost.',
+    conf_no:'No',conf_yes:'Yes, End',
+    w_title:'🎉 You Won!',
+    w_txt:'System predicted all cells successfully!\nRegister on 1xBet to withdraw your real winnings 💰',
+    w_reg:'💰 Register & Deposit Now',w_new:'Play Again',
+    btn_new:'New Game',btn_sig:'📡 SIGNAL',btn_menu:'Menu',
+  },
+  tr:{
+    title:'Sistemi nasıl kullanırsın? 🎯',
+    steps:[
+      'Aşağıdaki kodu kullanarak 1xBet\'te <b>yeni hesap</b> aç',
+      'Sinyal sistemini etkinleştirmek için <b>5$ veya fazlası</b> yatır',
+      '1xBet\'te <b>"Apple of Fortune"</b> oyununu aç',
+      '<b>1xBet hesap ID\'ni</b> gir ve SIGNAL\'e bas',
+      'Oyunda <b>aynı vurgulanan hücreye</b> tıkla 💰'
+    ],
+    alert:'Sistem YALNIZCA şu kodla kayıtlı hesaplarda çalışır:',
+    alert2:'Kodsuz hesap = sinyaller çalışmaz',
+    tiertitle:'Yatırım Planları',
+    bmin:'Minimum',brec:'⚡ Önerilen',bvip:'👑 VIP',
+    min_sub:'Sinyaller aktif',min_tot:'✅ Sinyaller',
+    rec_sub:'Bonus +150%',vip_sub:'Bonus +100%',
+    reg:'💰 Şimdi Kaydol ve Kazan',
+    start:'🎯 Tahmine Başla',
+    id_title:'🔐 Hesap ID Girin',
+    id_txt:'Sinyal almak için 10 haneli 1xBet hesap ID\'nizi girin',
+    id_cancel:'İptal',id_ok:'Doğrula',
+    id_err:'ID tam olarak 10 rakam olmalı',
+    err_title:'❌ Hesap Bulunamadı',
+    err_txt:'Hesabınız çok eski veya promo kodu ile kayıtlı değil.\nRABAH26 kodu ile yeni hesap oluşturun ve en az $5 yatırın.',
+    err_reg:'💰 Yeni Hesap Aç',err_close:'Kapat',
+    conf_title:'⚠️ Turu Bitir?',
+    conf_txt:'Mevcut turu bitirmek istiyor musunuz?',
+    conf_no:'Hayır',conf_yes:'Evet, Bitir',
+    w_title:'🎉 Kazandın!',
+    w_txt:'Sistem tüm hücreleri tahmin etti!\n1xBet\'e kaydol ve gerçek kazancını çek 💰',
+    w_reg:'💰 Kaydol ve Yatır',w_new:'Tekrar Oyna',
+    btn_new:'Yeni Oyun',btn_sig:'📡 SIGNAL',btn_menu:'Menü',
+  },
+  fr:{
+    title:'Comment utiliser le système? 🎯',
+    steps:[
+      'Crée un <b>nouveau compte</b> sur 1xBet avec le code ci-dessous',
+      'Dépose <b>5$ ou plus</b> pour activer le système de signaux',
+      'Ouvre <b>"Apple of Fortune"</b> sur 1xBet',
+      'Entre ton <b>ID de compte</b> 1xBet et appuie sur SIGNAL',
+      'Clique sur la <b>même case surlignée</b> dans le jeu 💰'
+    ],
+    alert:'Système fonctionne UNIQUEMENT avec les comptes enregistrés avec le code:',
+    alert2:'Sans code = les signaux ne fonctionnent pas',
+    tiertitle:'Plans de Dépôt et Bonus',
+    bmin:'Minimum',brec:'⚡ Recommandé',bvip:'👑 VIP',
+    min_sub:'Signaux activés',min_tot:'✅ Signaux',
+    rec_sub:'Bonus +150%',vip_sub:'Bonus +100%',
+    reg:'💰 Inscris-toi et Commence à Gagner',
+    start:'🎯 Commencer la Prédiction',
+    id_title:'🔐 Entrez l\'ID',
+    id_txt:'Entrez votre ID de compte 1xBet à 10 chiffres',
+    id_cancel:'Annuler',id_ok:'Vérifier',
+    id_err:'L\'ID doit être exactement 10 chiffres',
+    err_title:'❌ Compte Introuvable',
+    err_txt:'Votre compte est trop ancien ou non enregistré avec le code promo.\nCréez un nouveau compte avec le code RABAH26 et déposez au moins 5$.',
+    err_reg:'💰 Créer un Nouveau Compte',err_close:'Fermer',
+    conf_title:'⚠️ Terminer le Round?',
+    conf_txt:'Terminer le round actuel? Toute progression sera perdue.',
+    conf_no:'Non',conf_yes:'Oui, Terminer',
+    w_title:'🎉 Gagné!',
+    w_txt:'Le système a prédit toutes les cases!\nInscris-toi sur 1xBet pour retirer tes gains 💰',
+    w_reg:'💰 S\'inscrire et Déposer',w_new:'Rejouer',
+    btn_new:'Nouveau Jeu',btn_sig:'📡 SIGNAL',btn_menu:'Menu',
+  }
+};
+
+const ROWS=15, COLS=5;
+let lang='ar', curRow=0, revealed=0, active=false, grid=[], sz=0, idOk=false;
+
+function tx(k){ return TX[lang][k]||TX.en[k]; }
+
+function applyLang(){
+  const l=lang, rtl=l==='ar';
+  document.documentElement.setAttribute('dir',rtl?'rtl':'ltr');
+  document.documentElement.setAttribute('lang',l);
+  document.querySelectorAll('.lb').forEach(b=>b.classList.remove('on'));
+  const lb=document.querySelector(`.lb[data-l="${l}"]`);
+  if(lb) lb.classList.add('on');
+
+  // Texts — set innerHTML only on containers, textContent on buttons
+  document.getElementById('t_title').innerHTML = tx('title');
+  const stepsEl=document.getElementById('t_steps');
+  stepsEl.innerHTML='';
+  tx('steps').forEach((s,i)=>{
+    stepsEl.innerHTML+=`<div class="step"><div class="snum">${i+1}</div><div class="stxt">${s}</div></div>`;
+  });
+  document.getElementById('t_alert').textContent = tx('alert');
+  document.getElementById('t_alert2').textContent = tx('alert2');
+  document.getElementById('t_tiertitle').textContent = tx('tiertitle');
+  document.getElementById('t_bmin').textContent = tx('bmin');
+  document.getElementById('t_brec').textContent = tx('brec');
+  document.getElementById('t_bvip').textContent = tx('bvip');
+  document.getElementById('t_min_sub').textContent = tx('min_sub');
+  document.getElementById('t_min_tot').textContent = tx('min_tot');
+  document.getElementById('t_rec_sub').textContent = tx('rec_sub');
+  document.getElementById('t_vip_sub').textContent = tx('vip_sub');
+  document.getElementById('btnReg').textContent = tx('reg');
+  document.getElementById('btnStart').textContent = tx('start');
+  document.getElementById('btnNew').textContent = tx('btn_new');
+  document.getElementById('btnSig').textContent = tx('btn_sig');
+  document.getElementById('btnMenu').textContent = tx('btn_menu');
+  document.getElementById('m_id_title').textContent = tx('id_title');
+  document.getElementById('m_id_txt').textContent = tx('id_txt');
+  document.getElementById('idInp').placeholder = '1680000000';
+  document.getElementById('btnIdCancel').textContent = tx('id_cancel');
+  document.getElementById('btnIdOk').textContent = tx('id_ok');
+  document.getElementById('m_err_title').textContent = tx('err_title');
+  document.getElementById('m_err_txt').textContent = tx('err_txt');
+  document.getElementById('btnErrReg').textContent = tx('err_reg');
+  document.getElementById('btnErrClose').textContent = tx('err_close');
+  document.getElementById('m_conf_title').textContent = tx('conf_title');
+  document.getElementById('m_conf_txt').textContent = tx('conf_txt');
+  document.getElementById('btnConfNo').textContent = tx('conf_no');
+  document.getElementById('btnConfYes').textContent = tx('conf_yes');
+  document.getElementById('w_title').textContent = tx('w_title');
+  document.getElementById('w_txt').textContent = tx('w_txt');
+  document.getElementById('btnWinReg').textContent = tx('w_reg');
+  document.getElementById('btnWinNew').textContent = tx('w_new');
+}
+
+function setLang(l){
+  lang=l; applyLang();
+}
+
+// Wire lang buttons with data attribute
+document.querySelectorAll('.lb').forEach(b=>{
+  const l=b.getAttribute('onclick').match(/setLang\('(\w+)'\)/)[1];
+  b.setAttribute('data-l',l);
+});
+
+// Wire all buttons via JS — no inline onclick in HTML (prevents issues)
+document.getElementById('btnStart').addEventListener('click', startGame);
+document.getElementById('btnNew').addEventListener('click', confirmEnd);
+document.getElementById('btnSig').addEventListener('click', openIdModal);
+document.getElementById('btnMenu').addEventListener('click', confirmEnd);
+document.getElementById('btnBack').addEventListener('click', confirmEnd);
+document.getElementById('btnIdCancel').addEventListener('click', ()=>closeM('mId'));
+document.getElementById('btnIdOk').addEventListener('click', checkId);
+document.getElementById('idInp').addEventListener('keydown', e=>{ if(e.key==='Enter') checkId(); });
+document.getElementById('btnErrClose').addEventListener('click', ()=>closeM('mErr'));
+document.getElementById('btnConfNo').addEventListener('click', ()=>closeM('mConf'));
+document.getElementById('btnConfYes').addEventListener('click', doNew);
+document.getElementById('btnWinNew').addEventListener('click', doNew);
+
+function openM(id){ document.getElementById(id).classList.add('on'); }
+function closeM(id){ document.getElementById(id).classList.remove('on'); }
+
+function startGame(){
+  document.getElementById('sIntro').classList.remove('on');
+  document.getElementById('sGame').classList.add('on');
+  document.getElementById('langBar').style.display='none';
+  idOk=false; doNew();
+}
+
+function doNew(){
+  closeM('mConf'); closeM('wOver');
+  curRow=0; revealed=0; active=true; idOk=false;
+  document.getElementById('btnSig').disabled=false;
+  buildGrid();
+}
+
+function confirmEnd(){
+  if(!active||revealed===0){ goMenu(); return; }
+  openM('mConf');
+}
+
+function goMenu(){
+  closeM('mConf');
+  document.getElementById('sGame').classList.remove('on');
+  document.getElementById('sIntro').classList.add('on');
+  document.getElementById('langBar').style.display='flex';
+  active=false;
+}
+
+// BUILD GRID
+function calcSize(){
+  const vp=document.getElementById('gvp');
+  return Math.floor((vp.offsetWidth-12)/COLS);
+}
+
+function buildGrid(){
+  const gin=document.getElementById('gin');
+  gin.innerHTML=''; grid=[];
+  sz=calcSize();
+  const rh=sz+3;
+  document.getElementById('gvp').style.height=(rh*8-3)+'px';
+
+  for(let r=ROWS-1;r>=0;r--){
+    const cc=Math.floor(Math.random()*COLS);
+    grid[r]=Array.from({length:COLS},(_,c)=>c===cc);
+    const row=document.createElement('div');
+    row.className='grow'; row.id='r'+r;
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'; cell.id='c'+r+'_'+c;
+      cell.style.cssText=`width:${sz}px;height:${sz}px`;
+      const it=document.createElement('img');
+      it.className='cimg itrue'; it.src='true.png';
+      const if_=document.createElement('img');
+      if_.className='cimg ifall'; if_.src='fall.png';
+      const dot=document.createElement('div'); dot.className='sdot'; dot.textContent='✓';
+      cell.appendChild(it); cell.appendChild(if_); cell.appendChild(dot);
+      row.appendChild(cell);
+    }
+    gin.appendChild(row);
+  }
+  updActive(); updProg(); scrollTo(0);
+}
+
+function updActive(){
+  document.querySelectorAll('.grow').forEach(r=>r.style.filter='');
+  const r=document.getElementById('r'+curRow);
+  if(r) r.style.filter='brightness(1.12)';
+}
+function updProg(){ document.getElementById('pfill').style.width=(revealed/ROWS*100)+'%'; }
+
+function scrollTo(tr){
+  const rh=sz+3, gin=document.getElementById('gin');
+  const vpH=parseInt(document.getElementById('gvp').style.height);
+  const vis=Math.floor(vpH/rh);
+  const domIdx=(ROWS-1)-tr;
+  let off=0;
+  if(domIdx>=vis) off=(domIdx-vis+1)*rh;
+  gin.style.transform=`translateY(-${off}px)`;
+}
+
+// ID MODAL
+function openIdModal(){
+  if(!active||curRow>=ROWS) return;
+  if(idOk){ runSignal(); return; }
+  document.getElementById('idErr').textContent='';
+  document.getElementById('idInp').value='';
+  openM('mId');
+  setTimeout(()=>document.getElementById('idInp').focus(),300);
+}
+
+function checkId(){
+  const v=document.getElementById('idInp').value.replace(/\D/g,'');
+  if(v.length!==10){
+    document.getElementById('idErr').textContent=tx('id_err'); return;
+  }
+  const pre=parseInt(v.substring(0,3));
+  closeM('mId');
+  if(![168,169,170,171].includes(pre)){
+    setTimeout(()=>openM('mErr'),200); return;
+  }
+  idOk=true; runSignal();
+}
+
+// SIGNAL
+function runSignal(){
+  if(!active||curRow>=ROWS) return;
+  const btn=document.getElementById('btnSig');
+  btn.disabled=true; btn.classList.add('spin');
+  document.querySelectorAll('.cell.glow').forEach(c=>c.classList.remove('glow'));
+  const rowEl=document.getElementById('r'+curRow);
+  if(rowEl){ const s=document.createElement('div'); s.className='scanline'; rowEl.appendChild(s); setTimeout(()=>s.remove(),700); }
+
+  setTimeout(()=>{
+    btn.classList.remove('spin');
+    const pc=grid[curRow].indexOf(true);
+    const pc_el=document.getElementById('c'+curRow+'_'+pc);
+    if(pc_el) pc_el.classList.add('glow');
+    setTimeout(()=>{
+      revealRow(curRow);
+      curRow++; revealed++;
+      updProg(); updActive(); scrollTo(curRow);
+      if(curRow>=ROWS){ active=false; setTimeout(showWin,700); }
+      btn.disabled=false;
+      particles();
+    },450);
+  },880);
+}
+
+function revealRow(r){
+  for(let c=0;c<COLS;c++){
+    const el=document.getElementById('c'+r+'_'+c);
+    if(!el) continue;
+    el.classList.remove('glow');
+    el.classList.add(grid[r][c]?'ok':'bad');
+  }
+}
+
+function showWin(){
+  openM('wOver');
+}
+
+function particles(){
+  ['🍎','✨','💰','🎯'].forEach((e,i)=>{
+    setTimeout(()=>{
+      const p=document.createElement('div'); p.className='pt';
+      p.style.cssText=`left:${15+Math.random()*70}vw;top:${35+Math.random()*35}vh;font-size:20px`;
+      p.textContent=e; document.body.appendChild(p);
+      setTimeout(()=>p.remove(),950);
+    },i*130);
+  });
+}
+
+// INIT
+applyLang();
+</script>
+</body>
+</html>
