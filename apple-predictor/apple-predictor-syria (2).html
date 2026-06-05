@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apple of Fortune — Signal Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-neon: #39ff14;
+  --green-light: #2ecc40;
+  --apple-red: #e8192c;
+  --gold: #FFD700;
+  --orange: #FF8C00;
+  --bg: #071a07;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Tajawal',sans-serif; background:var(--bg); min-height:100vh; overflow-x:hidden; }
+
+.jungle-bg {
+  position:fixed; inset:0; z-index:0;
+  background: radial-gradient(ellipse at 50% 110%, #1e6e1e 0%, #0c360c 40%, #071a07 100%);
+}
+.jungle-bg::before {
+  content:''; position:absolute; bottom:0; left:-10%; width:120%; height:38%;
+  background:
+    radial-gradient(ellipse 80px 160px at 8%  100%, #1a7a1a 0%, transparent 70%),
+    radial-gradient(ellipse 100px 200px at 28% 100%, #0d5c0d 0%, transparent 70%),
+    radial-gradient(ellipse 70px 140px at 50% 100%, #2a8a2a 0%, transparent 70%),
+    radial-gradient(ellipse 110px 220px at 72% 100%, #0a4a0a 0%, transparent 70%),
+    radial-gradient(ellipse 80px 160px at 92% 100%, #1d6b1d 0%, transparent 70%);
+  filter:blur(3px);
+}
+
+/* LOGO */
+.logo-wrap {
+  position:relative; z-index:20; background:#000;
+  text-align:center; line-height:0;
+  /* NO overflow:hidden — show full logo */
+  pointer-events:none;
+}
+.logo-wrap img {
+  width:90%; max-width:400px; display:block; margin:0 auto;
+  /* show full image, no crop */
+}
+
+/* LANG — only on intro */
+.lang-bar {
+  display:flex; justify-content:center; gap:8px; padding:8px 16px;
+  background:rgba(0,0,0,0.5); border-bottom:1px solid rgba(255,255,255,0.08);
+  position:relative; z-index:20;
+}
+.lang-btn { pointer-events:auto;
+  padding:4px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.3);
+  background:transparent; color:rgba(255,255,255,0.55); font-size:12px; cursor:pointer;
+  font-family:'Tajawal',sans-serif; transition:all 0.2s;
+}
+.lang-btn.active { background:var(--green-light); border-color:var(--green-light); color:#000; font-weight:700; }
+
+.screen { display:none; position:relative; z-index:10; }
+.screen.active { display:flex; flex-direction:column; min-height:100vh; }
+
+/* INTRO */
+#intro { padding:0 0 24px; }
+.intro-card {
+  margin:12px 14px 0; background:rgba(0,0,0,0.65);
+  border:1px solid rgba(57,255,20,0.18); border-radius:16px;
+  padding:18px 16px; backdrop-filter:blur(10px);
+}
+.intro-title { font-size:17px; font-weight:900; color:#fff; text-align:center; margin-bottom:16px; line-height:1.4; }
+.steps-list { display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+.step-item {
+  display:flex; align-items:flex-start; gap:10px;
+  background:rgba(255,255,255,0.04); border-radius:10px; padding:11px;
+  border-left:3px solid var(--green-light);
+}
+[dir="rtl"] .step-item { border-left:none; border-right:3px solid var(--green-light); }
+.step-num {
+  width:26px; height:26px; border-radius:50%; background:var(--green-light);
+  color:#000; font-weight:900; font-size:13px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.step-text { font-size:13px; color:rgba(255,255,255,0.85); line-height:1.5; }
+.step-text strong { color:var(--gold); }
+.alert-box {
+  background:rgba(232,25,44,0.1); border:1px solid rgba(232,25,44,0.35);
+  border-radius:12px; padding:14px; margin-bottom:18px; text-align:center;
+}
+.alert-icon { font-size:20px; margin-bottom:5px; }
+.alert-text { font-size:13px; color:rgba(255,255,255,0.88); line-height:1.5; }
+.promo-code {
+  display:inline-block; background:var(--apple-red); color:#fff;
+  font-weight:900; font-size:18px; padding:6px 16px; border-radius:8px;
+  margin:7px 0 4px; letter-spacing:2px;
+}
+.deposit-title {
+  font-size:13px; font-weight:700; color:rgba(255,255,255,0.55);
+  text-align:center; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;
+}
+.tier-list { display:flex; flex-direction:column; gap:7px; margin-bottom:18px; }
+.tier-item {
+  display:flex; align-items:center; justify-content:space-between; padding:10px 12px;
+  border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
+  position:relative; overflow:hidden;
+}
+.tier-item.recommended { border-color:rgba(255,140,0,0.5); background:rgba(255,140,0,0.07); }
+.tier-item.vip { border-color:rgba(138,43,226,0.5); background:rgba(138,43,226,0.07); }
+.tier-item.minimum { border-color:rgba(57,255,20,0.35); background:rgba(57,255,20,0.05); }
+.tier-badge { position:absolute; top:5px; left:8px; font-size:10px; padding:2px 7px; border-radius:10px; font-weight:700; }
+[dir="rtl"] .tier-badge { left:auto; right:8px; }
+.badge-min { background:var(--green-light); color:#000; }
+.badge-rec { background:var(--orange); color:#fff; }
+.badge-vip { background:#7B2FBE; color:#fff; }
+.tier-left { display:flex; flex-direction:column; padding-top:14px; }
+.tier-amount { font-size:20px; font-weight:900; color:#fff; }
+.tier-bonus-text { font-size:11px; color:rgba(255,255,255,0.45); margin-top:1px; }
+.tier-right { padding-top:14px; text-align:left; }
+[dir="rtl"] .tier-right { text-align:right; }
+.tier-total { font-size:13px; color:var(--gold); font-weight:700; }
+.tier-bonus-pct { font-size:11px; color:rgba(255,255,255,0.45); }
+.reg-btn { position:relative; z-index:30;
+  width:100%; padding:15px; border-radius:12px; border:none;
+  background:linear-gradient(135deg,#e8192c,#c0001f); color:#fff;
+  font-family:'Tajawal',sans-serif; font-size:16px; font-weight:900; cursor:pointer;
+  box-shadow:0 4px 20px rgba(232,25,44,0.35); text-decoration:none;
+  display:block; text-align:center; margin-bottom:12px;
+}
+.start-btn { position:relative; z-index:30;
+  width:100%; padding:14px; border-radius:12px; border:2px solid var(--green-neon);
+  background:transparent; color:var(--green-neon); font-family:'Tajawal',sans-serif;
+  font-size:15px; font-weight:900; cursor:pointer;
+  text-shadow:0 0 10px rgba(57,255,20,0.5); box-shadow:0 0 15px rgba(57,255,20,0.1);
+}
+
+/* GAME */
+#game { padding-bottom:16px; }
+.game-header {
+  display:flex; align-items:center; justify-content:space-between; padding:10px 14px;
+  background:rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.game-title {
+  font-family:'Oswald',sans-serif; font-size:14px; font-weight:700;
+  color:#fff; letter-spacing:2px; text-transform:uppercase; flex:1; text-align:center;
+}
+.back-btn { background:none; border:none; color:rgba(255,255,255,0.5); font-size:20px; cursor:pointer; padding:4px 8px; }
+.header-spacer { width:40px; }
+
+.game-wrap { display:flex; padding:8px 5px 6px; }
+.grid-col { flex:1; display:flex; flex-direction:column; }
+.progress-wrap { margin-bottom:5px; }
+.progress-bar { height:3px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.progress-fill {
+  height:100%; background:var(--green-neon); border-radius:2px;
+  transition:width 0.4s ease; box-shadow:0 0 6px rgba(57,255,20,0.6);
+}
+.grid-viewport { overflow:hidden; position:relative; }
+.grid-inner { transition:transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94); }
+.grid-row { display:flex; gap:3px; margin-bottom:3px; position:relative; }
+
+/* CELL */
+.cell {
+  flex:none; border-radius:50%;
+  background: radial-gradient(circle at 40% 35%, #c8823a, #8c5218 55%, #5e3008);
+  border:2px solid rgba(210,160,70,0.3);
+  box-shadow: inset 0 -5px 10px rgba(0,0,0,0.5), inset 0 3px 6px rgba(255,200,90,0.15), 0 3px 6px rgba(0,0,0,0.4);
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; cursor:default;
+}
+.cell::before {
+  content:''; position:absolute; top:10%; left:20%;
+  width:28%; height:20%; background:rgba(255,255,255,0.18);
+  border-radius:50%; transform:rotate(-35deg); pointer-events:none;
+}
+.cell-img {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; border-radius:50%;
+  opacity:0; transition:opacity 0.15s; pointer-events:none;
+}
+.cell.revealed-correct {
+  border-color:rgba(100,220,100,0.6);
+  animation: burstOpen 0.5s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+}
+.cell.revealed-correct .img-true { opacity:1; }
+.cell.revealed-correct::before { display:none; }
+.cell.revealed-wrong { opacity:0.7; }
+.cell.revealed-wrong .img-fall { opacity:1; }
+.cell.revealed-wrong::before { opacity:0.4; }
+
+@keyframes burstOpen {
+  0%   { transform:scale(1); box-shadow: inset 0 -5px 10px rgba(0,0,0,0.5), 0 3px 6px rgba(0,0,0,0.4); }
+  20%  { transform:scale(1.18); box-shadow: 0 0 20px rgba(57,255,20,0.8), 0 0 40px rgba(57,255,20,0.4); }
+  40%  { transform:scale(0.92); }
+  60%  { transform:scale(1.08); box-shadow: 0 0 14px rgba(57,255,20,0.5); }
+  80%  { transform:scale(0.97); }
+  100% { transform:scale(1); box-shadow: 0 0 8px rgba(57,255,20,0.3); }
+}
+
+.cell.predicted {
+  border:2.5px solid var(--green-neon) !important;
+  box-shadow: 0 0 16px rgba(57,255,20,0.9), 0 0 32px rgba(57,255,20,0.4), inset 0 0 10px rgba(57,255,20,0.1) !important;
+  animation: pulseGlow 0.85s ease-in-out infinite !important;
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow:0 0 16px rgba(57,255,20,0.9),0 0 32px rgba(57,255,20,0.4); }
+  50%      { box-shadow:0 0 28px rgba(57,255,20,1),0 0 55px rgba(57,255,20,0.6); }
+}
+.sig-dot {
+  position:absolute; top:1px; right:1px; width:14px; height:14px;
+  border-radius:50%; background:var(--green-neon);
+  display:none; align-items:center; justify-content:center;
+  font-size:8px; font-weight:900; color:#000; z-index:5;
+  animation:blinkDot 0.7s ease-in-out infinite;
+}
+[dir="rtl"] .sig-dot { right:auto; left:1px; }
+.cell.predicted .sig-dot { display:flex; }
+@keyframes blinkDot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.45;transform:scale(0.75);} }
+
+/* BOTTOM */
+.game-bottom { padding:6px 10px 0; }
+.btn-row { display:flex; gap:5px; margin-bottom:8px; }
+.btn-game { position:relative; z-index:30;
+  flex:1; padding:13px 5px; border-radius:10px; border:none;
+  font-family:'Oswald',sans-serif; font-size:13px; font-weight:700; letter-spacing:1px;
+  cursor:pointer; transition:transform 0.15s, opacity 0.15s; text-transform:uppercase;
+}
+.btn-game:active { transform:scale(0.95); opacity:0.85; }
+.btn-new  { background:#e6a817; color:#000; }
+.btn-signal {
+  background:linear-gradient(135deg,#1a9c1a,#0d6b0d); color:#fff;
+  font-size:14px; flex:1.6; box-shadow:0 3px 14px rgba(46,204,64,0.45);
+  border:1px solid rgba(57,255,20,0.4);
+}
+.btn-signal.loading { animation:sigPulse 0.55s ease-in-out infinite; }
+.btn-signal:disabled { opacity:0.55; }
+@keyframes sigPulse {
+  0%,100%{ box-shadow:0 3px 14px rgba(46,204,64,0.45); }
+  50%    { box-shadow:0 3px 28px rgba(57,255,20,0.9); }
+}
+.btn-menu { background:#4a90d9; color:#fff; }
+
+/* MODALS */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:200;
+  display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.show { display:flex; animation:fadeIn 0.25s ease; }
+.modal-box {
+  background:rgba(8,28,8,0.97); border:1.5px solid rgba(57,255,20,0.3);
+  border-radius:18px; padding:24px 20px; margin:20px;
+  box-shadow:0 0 30px rgba(57,255,20,0.15); text-align:center; width:100%; max-width:360px;
+}
+.modal-title { font-family:'Oswald',sans-serif; font-size:20px; font-weight:700; color:#fff; margin-bottom:10px; }
+.modal-text { font-size:14px; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:18px; }
+.modal-input {
+  width:100%; padding:12px 14px; border-radius:10px;
+  border:1.5px solid rgba(57,255,20,0.4); background:rgba(255,255,255,0.06);
+  color:#fff; font-size:16px; font-family:'Tajawal',sans-serif;
+  text-align:center; letter-spacing:3px; margin-bottom:6px;
+  outline:none;
+}
+.modal-input:focus { border-color:var(--green-neon); box-shadow:0 0 10px rgba(57,255,20,0.3); }
+.modal-error { font-size:12px; color:#ff6060; min-height:18px; margin-bottom:12px; text-align:center; }
+.modal-btn-row { display:flex; gap:8px; }
+.modal-btn {
+  flex:1; padding:13px; border-radius:10px; border:none;
+  font-family:'Oswald',sans-serif; font-size:14px; font-weight:700; cursor:pointer;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+.modal-btn.confirm {
+  background:linear-gradient(135deg,#1a9c1a,#0d6b0d); color:#fff;
+  box-shadow:0 3px 12px rgba(46,204,64,0.35);
+}
+.modal-btn.cancel { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.65); }
+
+/* Error modal (old account) */
+.modal-box.error-box { border-color:rgba(232,25,44,0.4); }
+.err-reg-btn {
+  display:block; width:100%; padding:14px; border-radius:12px;
+  background:linear-gradient(135deg,#e8192c,#c0001f); color:#fff;
+  font-size:15px; font-weight:900; text-decoration:none;
+  font-family:'Tajawal',sans-serif; box-shadow:0 4px 18px rgba(232,25,44,0.4); margin-bottom:10px;
+}
+.err-close-btn {
+  background:transparent; border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.55);
+  padding:10px; border-radius:10px; width:100%; font-family:'Tajawal',sans-serif;
+  font-size:13px; cursor:pointer;
+}
+
+/* Confirm new game modal */
+.modal-btn.danger { background:linear-gradient(135deg,#e8192c,#b80018); color:#fff; }
+
+/* WIN */
+.win-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.78); z-index:100;
+  display:none; align-items:center; justify-content:center; flex-direction:column;
+}
+.win-overlay.show { display:flex; animation:fadeIn 0.3s ease; }
+.win-box {
+  background:rgba(8,36,8,0.97); border:2px solid var(--green-neon);
+  border-radius:20px; padding:28px 22px; margin:18px;
+  box-shadow:0 0 40px rgba(57,255,20,0.28); text-align:center;
+}
+.win-title { font-family:'Oswald',sans-serif; font-size:34px; font-weight:700; color:#fff; margin-bottom:10px; text-shadow:0 0 18px rgba(57,255,20,0.5); }
+.win-text { font-size:14px; color:rgba(255,255,255,0.7); margin-bottom:20px; line-height:1.6; }
+.win-reg-btn {
+  display:block; width:100%; padding:15px; border-radius:12px;
+  background:linear-gradient(135deg,#e8192c,#c0001f); color:#fff;
+  font-size:15px; font-weight:900; text-decoration:none; margin-bottom:10px;
+  font-family:'Tajawal',sans-serif; box-shadow:0 4px 18px rgba(232,25,44,0.4);
+}
+.win-new-btn {
+  background:transparent; border:1px solid rgba(255,255,255,0.25); color:rgba(255,255,255,0.6);
+  padding:11px; border-radius:10px; width:100%; font-family:'Tajawal',sans-serif;
+  font-size:13px; cursor:pointer;
+}
+
+/* SCAN */
+.scan-line {
+  position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(57,255,20,0.4),transparent);
+  animation:scanMove 0.65s ease-in-out; border-radius:10px; z-index:10;
+}
+@keyframes scanMove { 0%{transform:translateX(-100%);}100%{transform:translateX(100%);} }
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+.particle { position:fixed; pointer-events:none; z-index:50; animation:pFly 0.9s ease-out forwards; }
+@keyframes pFly { 0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-75px) scale(0.3);} }
+</style>
+</head>
+<body>
+<div class="jungle-bg"></div>
+
+<!-- LOGO — shared top bar -->
+<div class="logo-wrap" id="logoWrap">
+  <img src="logo.png" alt="Apple of Fortune Signal Programm">
+</div>
+
+<!-- LANG BAR — only shown on intro -->
+<div class="lang-bar" id="langBar">
+  <button class="lang-btn active" onclick="setLang('ar')">عربي</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('tr')">TR</button>
+  <button class="lang-btn" onclick="setLang('fr')">FR</button>
+</div>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div style="padding:0 0 24px;">
+    <div class="intro-card">
+      <div class="intro-title" data-ar="كيف تستخدم النظام؟ 🎯" data-en="How to use the system? 🎯" data-tr="Sistemi nasıl kullanırsın? 🎯" data-fr="Comment utiliser le système? 🎯">كيف تستخدم النظام؟ 🎯</div>
+      <div class="steps-list">
+        <div class="step-item"><div class="step-num">1</div><div class="step-text" data-ar="سجّل <strong>حساب جديد</strong> على 1xBet باستخدام الكود أدناه" data-en="Register a <strong>new account</strong> on 1xBet using the code below" data-tr="Kodu kullanarak 1xBet'te <strong>yeni hesap</strong> aç" data-fr="Crée un <strong>nouveau compte</strong> sur 1xBet avec le code">سجّل <strong>حساب جديد</strong> على 1xBet باستخدام الكود أدناه</div></div>
+        <div class="step-item"><div class="step-num">2</div><div class="step-text" data-ar="اشحن حسابك بمبلغ <strong>$5 أو أكثر</strong> لتفعيل نظام الإشارات" data-en="Deposit <strong>$5 or more</strong> to activate signals" data-tr="<strong>5$ veya fazlası</strong> yatırarak sistemi etkinleştir" data-fr="Dépose <strong>5$ ou plus</strong> pour activer les signaux">اشحن حسابك بمبلغ <strong>$5 أو أكثر</strong> لتفعيل نظام الإشارات</div></div>
+        <div class="step-item"><div class="step-num">3</div><div class="step-text" data-ar='افتح لعبة <strong>"Apple of Fortune"</strong> على 1xBet' data-en='Open <strong>"Apple of Fortune"</strong> on 1xBet' data-tr='1xBet'te <strong>"Apple of Fortune"</strong> oyununu aç' data-fr='Ouvre <strong>"Apple of Fortune"</strong> sur 1xBet'>افتح لعبة <strong>"Apple of Fortune"</strong> على 1xBet</div></div>
+        <div class="step-item"><div class="step-num">4</div><div class="step-text" data-ar="أدخل <strong>ID حسابك</strong> على 1xBet واضغط SIGNAL للحصول على الإشارة" data-en="Enter your <strong>1xBet account ID</strong> and press SIGNAL" data-tr="<strong>1xBet hesap ID'nizi</strong> girin ve SIGNAL'e basın" data-fr="Entrez votre <strong>ID de compte</strong> 1xBet et appuyez sur SIGNAL">أدخل <strong>ID حسابك</strong> على 1xBet واضغط SIGNAL للحصول على الإشارة</div></div>
+        <div class="step-item"><div class="step-num">5</div><div class="step-text" data-ar="انقر على <strong>نفس الخانة</strong> المضيئة في اللعبة واجمع ربحك 💰" data-en="Click the <strong>same highlighted cell</strong> in the game 💰" data-tr="Oyunda <strong>aynı vurgulanan hücreye</strong> tıkla 💰" data-fr="Clique sur la <strong>même case</strong> surlignée 💰">انقر على <strong>نفس الخانة</strong> المضيئة في اللعبة واجمع ربحك 💰</div></div>
+      </div>
+      <div class="alert-box">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-text" data-ar="النظام يعمل فقط مع حسابات مسجّلة بالكود:" data-en="System works ONLY with accounts registered with code:" data-tr="Sistem YALNIZCA şu kodla kayıtlı hesaplarda çalışır:" data-fr="Système fonctionne UNIQUEMENT avec le code:">النظام يعمل فقط مع حسابات مسجّلة بالكود:</div>
+        <div class="promo-code">RABAH26</div>
+        <div class="alert-text" style="font-size:12px;margin-top:5px;" data-ar="حساب بدون الكود = الإشارات لا تعمل" data-en="Account without code = signals won't work" data-tr="Kodsuz hesap = sinyaller çalışmaz" data-fr="Sans code = les signaux ne fonctionnent pas">حساب بدون الكود = الإشارات لا تعمل</div>
+      </div>
+      <div class="deposit-title" data-ar="خطط الإيداع والمكافآت" data-en="Deposit Plans & Bonuses" data-tr="Yatırım Planları" data-fr="Plans de Dépôt">خطط الإيداع والمكافآت</div>
+      <div class="tier-list">
+        <div class="tier-item minimum"><span class="tier-badge badge-min" data-ar="الحد الأدنى" data-en="Minimum" data-tr="Minimum" data-fr="Minimum">الحد الأدنى</span><div class="tier-left"><div class="tier-amount">$5</div><div class="tier-bonus-text" data-ar="تفعيل الإشارات" data-en="Signals activated" data-tr="Sinyaller aktif" data-fr="Signaux activés">تفعيل الإشارات</div></div><div class="tier-right"><div class="tier-total" data-ar="✅ الإشارات" data-en="✅ Signals" data-tr="✅ Sinyaller" data-fr="✅ Signaux">✅ الإشارات</div></div></div>
+        <div class="tier-item recommended"><span class="tier-badge badge-rec" data-ar="⚡ موصى به" data-en="⚡ Recommended" data-tr="⚡ Önerilen" data-fr="⚡ Recommandé">⚡ موصى به</span><div class="tier-left"><div class="tier-amount">$10</div><div class="tier-bonus-text" data-ar="بونوس +150%" data-en="Bonus +150%" data-tr="Bonus +150%" data-fr="Bonus +150%">بونوس +150%</div></div><div class="tier-right"><div class="tier-total">= $25</div><div class="tier-bonus-pct">$10 + $15</div></div></div>
+        <div class="tier-item vip"><span class="tier-badge badge-vip" data-ar="👑 VIP" data-en="👑 VIP" data-tr="👑 VIP" data-fr="👑 VIP">👑 VIP</span><div class="tier-left"><div class="tier-amount">$20</div><div class="tier-bonus-text" data-ar="بونوس +100%" data-en="Bonus +100%" data-tr="Bonus +100%" data-fr="Bonus +100%">بونوس +100%</div></div><div class="tier-right"><div class="tier-total">= $40</div><div class="tier-bonus-pct">$20 + $20</div></div></div>
+      </div>
+      <a href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="reg-btn" data-ar="💰 سجّل الآن وابدأ تكسب" data-en="💰 Register Now & Start Winning" data-tr="💰 Şimdi Kaydol ve Kazan" data-fr="💰 Inscris-toi et Commence à Gagner">💰 سجّل الآن وابدأ تكسب</a>
+      <button class="start-btn" onclick="startGame()" data-ar="🎯 ابدأ التنبؤ" data-en="🎯 Start Predicting" data-tr="🎯 Tahmine Başla" data-fr="🎯 Commencer">🎯 ابدأ التنبؤ</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="confirmNewGame()">←</button>
+    <div class="game-title">APPLE OF FORTUNE</div>
+    <div class="header-spacer"></div>
+  </div>
+  <div class="game-wrap">
+    <div class="grid-col">
+      <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div></div>
+      <div class="grid-viewport" id="gridViewport">
+        <div class="grid-inner" id="gridInner"></div>
+      </div>
+    </div>
+  </div>
+  <div class="game-bottom">
+    <div class="btn-row">
+      <button class="btn-game btn-new" onclick="confirmNewGame()" data-ar="لعبة جديدة" data-en="New Game" data-tr="Yeni Oyun" data-fr="Nouveau Jeu">New Game</button>
+      <button class="btn-game btn-signal" id="signalBtn" onclick="openIdModal()" data-ar="📡 SIGNAL" data-en="📡 SIGNAL" data-tr="📡 SIGNAL" data-fr="📡 SIGNAL">📡 SIGNAL</button>
+      <button class="btn-game btn-menu" onclick="confirmNewGame()" data-ar="القائمة" data-en="Menu" data-tr="Menü" data-fr="Menu">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ID check -->
+<div class="modal-overlay" id="idModal">
+  <div class="modal-box">
+    <div class="modal-title" id="idModalTitle">🔐 Enter ID</div>
+    <div class="modal-text" id="idModalText">Enter your 10-digit 1xBet account ID to receive the signal</div>
+    <input class="modal-input" id="idInput" type="number" placeholder="1680000000" maxlength="10" inputmode="numeric">
+    <div class="modal-error" id="idError"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn cancel" onclick="closeIdModal()" id="idCancelBtn">Cancel</button>
+      <button class="modal-btn confirm" onclick="checkId()" id="idConfirmBtn">Verify</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Old account error -->
+<div class="modal-overlay" id="errModal">
+  <div class="modal-box error-box">
+    <div class="modal-title" style="color:#ff6060;" id="errTitle">❌ ID Not Found</div>
+    <div class="modal-text" id="errText">Your account is too old or not registered with the promo code. Create a new account to activate signals.</div>
+    <a href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="err-reg-btn" id="errRegBtn">💰 Register New Account</a>
+    <button class="err-close-btn" onclick="closeErrModal()" id="errCloseBtn">Close</button>
+  </div>
+</div>
+
+<!-- MODAL: Confirm new game -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">⚠️ End Round?</div>
+    <div class="modal-text" id="confirmText">Are you sure you want to end the current round? Progress will be lost.</div>
+    <div class="modal-btn-row">
+      <button class="modal-btn cancel" onclick="closeConfirm()" id="confirmCancelBtn">No</button>
+      <button class="modal-btn danger" onclick="doNewGame()" id="confirmYesBtn">Yes, End</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="win-overlay" id="winOverlay">
+  <div class="win-box">
+    <div class="win-title" id="winTitle">🎉 فزت!</div>
+    <div class="win-text" id="winText" data-ar="النظام حدّد كل الخانات بنجاح!<br>سجّل الآن على 1xBet لسحب أرباحك الحقيقية 💰" data-en="System predicted all cells!<br>Register on 1xBet to withdraw your real winnings 💰" data-tr="Sistem tüm hücreleri tahmin etti!<br>Gerçek kazancını çekmek için 1xBet'e kaydol 💰" data-fr="Toutes les cases prédites!<br>Inscris-toi sur 1xBet pour retirer tes gains 💰">النظام حدّد كل الخانات بنجاح!<br>سجّل الآن على 1xBet لسحب أرباحك الحقيقية 💰</div>
+    <a href="https://reffpa.com/L?tag=d_5512033m_97c_&pb=a0dae56e63714e9a8b2d5a827bf6bc56&click_id=Syria&r=registration" target="_blank" class="win-reg-btn" id="winRegBtn" data-ar="💰 سجّل واشحن الآن" data-en="💰 Register & Deposit Now" data-tr="💰 Kaydol ve Yatır" data-fr="💰 S'inscrire et Déposer">💰 سجّل واشحن الآن</a>
+    <button class="win-new-btn" onclick="doNewGame()" data-ar="العب مرة أخرى" data-en="Play Again" data-tr="Tekrar Oyna" data-fr="Rejouer">العب مرة أخرى</button>
+  </div>
+</div>
+
+<script>
+const ROWS=15, COLS=5;
+const TRUE_IMG="true.png";
+const FALL_IMG="fall.png";
+let lang='ar', currentRow=0, revealedRows=0, gameActive=false, gridData=[], cellSize=0;
+let idVerified=false;
+
+// Lang texts
+const T = {
+  ar:{
+    idTitle:'🔐 أدخل ID حسابك',
+    idText:'أدخل رقم حسابك في 1xBet المكون من 10 أرقام للحصول على الإشارة',
+    idPlaceholder:'1680000000',
+    idCancel:'إلغاء', idConfirm:'تحقق',
+    errTitle:'❌ الحساب غير مرتبط',
+    errText:'حسابك قديم أو غير مسجّل بكود البرنامج. النظام لا يتعرف على هذا الـ ID.\nأنشئ حساباً جديداً باستخدام الكود RABAH26 واشحن بمبلغ $5 على الأقل.',
+    errReg:'💰 إنشاء حساب جديد', errClose:'إغلاق',
+    confirmTitle:'⚠️ إنهاء الجولة؟',
+    confirmText:'هل أنت متأكد أنك تريد إنهاء الجولة الحالية؟ ستُفقد جميع الإشارات.',
+    confirmNo:'لا', confirmYes:'نعم، إنهاء',
+    winTitle:'🎉 فزت!',
+    errInput:'يجب أن يكون الرقم 10 أرقام',
+    errOld:'⛔ حساب قديم — لا يمكن ربطه بالنظام',
+  },
+  en:{
+    idTitle:'🔐 Enter Account ID',
+    idText:'Enter your 10-digit 1xBet account ID to receive the signal',
+    idPlaceholder:'1680000000',
+    idCancel:'Cancel', idConfirm:'Verify',
+    errTitle:'❌ Account Not Found',
+    errText:'Your account is too old or not registered with the promo code.\nCreate a new account with code RABAH26 and deposit at least $5.',
+    errReg:'💰 Register New Account', errClose:'Close',
+    confirmTitle:'⚠️ End Round?',
+    confirmText:'Are you sure you want to end the current round? All progress will be lost.',
+    confirmNo:'No', confirmYes:'Yes, End',
+    winTitle:'🎉 You Won!',
+    errInput:'ID must be exactly 10 digits',
+    errOld:'⛔ Old account — cannot connect to system',
+  },
+  tr:{
+    idTitle:'🔐 Hesap ID Girin',
+    idText:'Sinyal almak için 10 haneli 1xBet hesap ID'nizi girin',
+    idPlaceholder:'1680000000',
+    idCancel:'İptal', idConfirm:'Doğrula',
+    errTitle:'❌ Hesap Bulunamadı',
+    errText:'Hesabınız çok eski veya promo kodu ile kayıtlı değil.\nRABAH26 kodu ile yeni hesap oluşturun ve en az $5 yatırın.',
+    errReg:'💰 Yeni Hesap Aç', errClose:'Kapat',
+    confirmTitle:'⚠️ Turu Bitir?',
+    confirmText:'Mevcut turu bitirmek istediğinizden emin misiniz? Tüm ilerleme kaybolacak.',
+    confirmNo:'Hayır', confirmYes:'Evet, Bitir',
+    winTitle:'🎉 Kazandın!',
+    errInput:'ID tam olarak 10 rakam olmalı',
+    errOld:'⛔ Eski hesap — sisteme bağlanamaz',
+  },
+  fr:{
+    idTitle:'🔐 Entrez l'ID',
+    idText:'Entrez votre ID de compte 1xBet à 10 chiffres pour recevoir le signal',
+    idPlaceholder:'1680000000',
+    idCancel:'Annuler', idConfirm:'Vérifier',
+    errTitle:'❌ Compte Introuvable',
+    errText:'Votre compte est trop ancien ou non enregistré avec le code promo.\nCréez un nouveau compte avec le code RABAH26 et déposez au moins 5$.',
+    errReg:'💰 Créer un Nouveau Compte', errClose:'Fermer',
+    confirmTitle:'⚠️ Terminer le Round?',
+    confirmText:'Êtes-vous sûr de vouloir terminer le round? Tous les progrès seront perdus.',
+    confirmNo:'Non', confirmYes:'Oui, Terminer',
+    winTitle:'🎉 Gagné!',
+    errInput:'L'ID doit être exactement 10 chiffres',
+    errOld:'⛔ Ancien compte — impossible de connecter',
+  }
+};
+
+function t(key){ return T[lang][key]||T['en'][key]; }
+
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  document.documentElement.setAttribute('dir',l==='ar'?'rtl':'ltr');
+  document.documentElement.setAttribute('lang',l);
+  document.querySelectorAll('[data-'+l+']').forEach(el=>{
+    const v=el.getAttribute('data-'+l);
+    if(el.tagName==='A'||el.tagName==='BUTTON') el.textContent=v; else el.innerHTML=v;
+  });
+}
+
+function computeSize(){
+  const gc=document.querySelector('.grid-col');
+  if(!gc) return 46;
+  return Math.floor((gc.offsetWidth-12)/5);
+}
+
+function buildGrid(){
+  const gi=document.getElementById('gridInner');
+  gi.innerHTML=''; gridData=[];
+  cellSize=computeSize();
+  const rowH=cellSize+3;
+  document.getElementById('gridViewport').style.height=(rowH*8-3)+'px'; // show 8 rows
+
+  for(let r=ROWS-1;r>=0;r--){
+    const cc=Math.floor(Math.random()*COLS);
+    gridData[r]=Array.from({length:COLS},(_,c)=>{return{correct:c===cc}});
+    const row=document.createElement('div');
+    row.className='grid-row'; row.id='row-'+r;
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'; cell.id='cell-'+r+'-'+c;
+      cell.style.width=cellSize+'px'; cell.style.height=cellSize+'px';
+      const imgTrue=document.createElement('img');
+      imgTrue.className='cell-img img-true'; imgTrue.src=TRUE_IMG;
+      const imgFall=document.createElement('img');
+      imgFall.className='cell-img img-fall'; imgFall.src=FALL_IMG;
+      const dot=document.createElement('div'); dot.className='sig-dot'; dot.textContent='✓';
+      cell.appendChild(imgTrue); cell.appendChild(imgFall); cell.appendChild(dot);
+      row.appendChild(cell);
+    }
+    gi.appendChild(row);
+  }
+  updateActiveRow(); updateProgress(); scrollToRow(0);
+}
+
+function updateActiveRow(){
+  document.querySelectorAll('.grid-row').forEach(r=>r.style.opacity='1');
+  // highlight active row subtly
+  const rowEl=document.getElementById('row-'+currentRow);
+  if(rowEl) rowEl.style.filter='brightness(1.1)';
+}
+function updateProgress(){ document.getElementById('progressFill').style.width=(revealedRows/ROWS*100)+'%'; }
+
+function startGame(){
+  document.getElementById('intro').classList.remove('active');
+  document.getElementById('game').classList.add('active');
+  document.getElementById('langBar').style.display='none';
+  idVerified=false;
+  doNewGame();
+}
+
+function doNewGame(){
+  document.getElementById('confirmModal').classList.remove('show');
+  document.getElementById('winOverlay').classList.remove('show');
+  currentRow=0; revealedRows=0; gameActive=true; idVerified=false;
+  document.getElementById('signalBtn').disabled=false;
+  buildGrid(); setLang(lang);
+}
+
+function confirmNewGame(){
+  if(!gameActive||revealedRows===0){ goMenu(); return; }
+  document.getElementById('confirmTitle').textContent=t('confirmTitle');
+  document.getElementById('confirmText').textContent=t('confirmText');
+  document.getElementById('confirmCancelBtn').textContent=t('confirmNo');
+  document.getElementById('confirmYesBtn').textContent=t('confirmYes');
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirm(){ document.getElementById('confirmModal').classList.remove('show'); }
+
+function goMenu(){
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('intro').classList.add('active');
+  document.getElementById('langBar').style.display='flex';
+  gameActive=false;
+  setLang(lang);
+}
+
+// ID MODAL
+function openIdModal(){
+  if(!gameActive||currentRow>=ROWS) return;
+  if(idVerified){ runSignal(); return; }
+  document.getElementById('idModalTitle').textContent=t('idTitle');
+  document.getElementById('idModalText').textContent=t('idText');
+  document.getElementById('idInput').placeholder=t('idPlaceholder');
+  document.getElementById('idCancelBtn').textContent=t('idCancel');
+  document.getElementById('idConfirmBtn').textContent=t('idConfirm');
+  document.getElementById('idError').textContent='';
+  document.getElementById('idInput').value='';
+  document.getElementById('idModal').classList.add('show');
+  setTimeout(()=>document.getElementById('idInput').focus(),300);
+}
+function closeIdModal(){ document.getElementById('idModal').classList.remove('show'); }
+
+function checkId(){
+  const val=document.getElementById('idInput').value.trim();
+  if(val.length!==10||!/^\d{10}$/.test(val)){
+    document.getElementById('idError').textContent=t('errInput'); return;
+  }
+  const prefix=parseInt(val.substring(0,3));
+  const validPrefixes=[168,169,170,171];
+  closeIdModal();
+  if(!validPrefixes.includes(prefix)){
+    // Old account
+    setTimeout(()=>showErrModal(),200);
+    return;
+  }
+  // Valid
+  idVerified=true;
+  runSignal();
+}
+
+function showErrModal(){
+  document.getElementById('errTitle').textContent=t('errTitle');
+  document.getElementById('errText').textContent=t('errText');
+  document.getElementById('errRegBtn').textContent=t('errReg');
+  document.getElementById('errCloseBtn').textContent=t('errClose');
+  document.getElementById('errModal').classList.add('show');
+}
+function closeErrModal(){ document.getElementById('errModal').classList.remove('show'); }
+
+// SIGNAL
+function runSignal(){
+  if(!gameActive||currentRow>=ROWS) return;
+  const btn=document.getElementById('signalBtn');
+  btn.disabled=true; btn.classList.add('loading');
+  document.querySelectorAll('.cell.predicted').forEach(c=>c.classList.remove('predicted'));
+  const rowEl=document.getElementById('row-'+currentRow);
+  if(rowEl){ const s=document.createElement('div'); s.className='scan-line'; rowEl.appendChild(s); setTimeout(()=>s.remove(),700); }
+
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    const pc=gridData[currentRow].findIndex(c=>c.correct);
+    const predCell=document.getElementById('cell-'+currentRow+'-'+pc);
+    if(predCell) predCell.classList.add('predicted');
+    setTimeout(()=>{
+      revealRow(currentRow);
+      currentRow++; revealedRows++;
+      updateProgress(); updateActiveRow(); scrollToRow(currentRow);
+      if(currentRow>=ROWS){ gameActive=false; setTimeout(showWin,700); }
+      btn.disabled=false;
+      spawnParticles();
+    },420);
+  },850);
+}
+
+function revealRow(r){
+  for(let c=0;c<COLS;c++){
+    const el=document.getElementById('cell-'+r+'-'+c);
+    if(!el) continue;
+    el.classList.remove('predicted');
+    el.classList.add(gridData[r][c].correct?'revealed-correct':'revealed-wrong');
+  }
+}
+
+function scrollToRow(tr){
+  const rowH=cellSize+3;
+  const gi=document.getElementById('gridInner');
+  const vp=document.getElementById('gridViewport');
+  const vpH=parseInt(vp.style.height);
+  const visRows=Math.floor(vpH/rowH);
+  const domIdx=(ROWS-1)-tr;
+  let offset=0;
+  if(domIdx>=visRows) offset=(domIdx-visRows+1)*rowH;
+  gi.style.transform='translateY(-'+offset+'px)';
+}
+
+function showWin(){
+  document.getElementById('winTitle').textContent=t('winTitle');
+  document.getElementById('winOverlay').classList.add('show');
+  setLang(lang);
+}
+
+function spawnParticles(){
+  ['🍎','✨','💰','🎯'].forEach((e,i)=>{
+    setTimeout(()=>{
+      const p=document.createElement('div'); p.className='particle';
+      const s=document.createElement('span'); s.style.fontSize='20px'; s.textContent=e;
+      p.appendChild(s); p.style.left=(15+Math.random()*70)+'vw'; p.style.top=(35+Math.random()*35)+'vh';
+      document.body.appendChild(p); setTimeout(()=>p.remove(),950);
+    },i*130);
+  });
+}
+
+setLang('ar');
+</script>
+</body>
+</html>
